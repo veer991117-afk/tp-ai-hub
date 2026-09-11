@@ -19,6 +19,40 @@ android {
 
         buildConfigField 'String', 'API_BASE_URL', '"http://127.0.0.1:3001"'
     }
+
+    // Fast build optimization
+    buildTypes {
+        debug {
+            debuggable true
+            minifyEnabled false
+            shrinkResources false
+            signingConfig signingConfigs.debug
+        }
+
+        release {
+            debuggable false
+            minifyEnabled true
+            shrinkResources true
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    packagingOptions {
+        exclude 'META-INF/proguard/androidx-*.pro'
+        exclude 'META-INF/DEPENDENCIES'
+    }
+
+    // Parallel build threads
+    gradle.projectsEvaluated {
+        tasks.withType(com.android.build.gradle.tasks.JavaCompile) {
+            options.incremental = true
+        }
+    }
 }
 
 dependencies {
