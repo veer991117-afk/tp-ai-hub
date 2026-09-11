@@ -6,10 +6,6 @@ android {
     namespace 'com.tpaihub.app'
     compileSdk 35
 
-    buildFeatures {
-        buildConfig true
-    }
-
     defaultConfig {
         applicationId 'com.tpaihub.app'
         minSdk 23
@@ -20,20 +16,21 @@ android {
         buildConfigField 'String', 'API_BASE_URL', '"http://127.0.0.1:3001"'
     }
 
-    // Fast build optimization
+    buildFeatures {
+        buildConfig true
+    }
+
     buildTypes {
         debug {
             debuggable true
             minifyEnabled false
             shrinkResources false
-            signingConfig signingConfigs.debug
         }
 
         release {
             debuggable false
             minifyEnabled true
             shrinkResources true
-            signingConfig signingConfigs.debug
         }
     }
 
@@ -45,13 +42,6 @@ android {
     packagingOptions {
         exclude 'META-INF/proguard/androidx-*.pro'
         exclude 'META-INF/DEPENDENCIES'
-    }
-
-    // Parallel build threads
-    gradle.projectsEvaluated {
-        tasks.withType(com.android.build.gradle.tasks.JavaCompile) {
-            options.incremental = true
-        }
     }
 }
 
