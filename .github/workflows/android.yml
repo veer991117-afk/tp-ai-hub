@@ -6,6 +6,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,35 +24,47 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
       - name: Install Android SDK
-        run: sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
-
-      - name: Fix gradlew permissions
-        working-directory: android
         run: |
-          chmod +x ./gradlew
+          sdkmanager "platform-tools" \
+            "platforms;android-35" \
+            "build-tools;35.0.0"
 
-      - name: Build APK
+      - name: Build Debug APK
         working-directory: android
-        run: ./gradlew assembleDebug --no-daemon
+        run: gradle assembleDebug --no-daemon
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
+      - name: Rename APK
+        run: |
+          mkdir -p release
+          cp android/app/build/outputs/apk/debug/*.apk \
+            release/TP-AI-HUB-debug.apk
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: TP-AI-HUB-debug
-          path: android/app/build/outputs/apk/debug/*.apk
-          retention-days: 7
+          tag_name: "build-${{ github.run_number }}"
+          name: "TP-AI-HUB Build ${{ github.run_number }}"
+          body: |
+            TP-AI-HUB APK
 
-      - name: Build AAB
+            Commit:
+            ${{ github.sha }}
+
+            Build:
+            ${{ github.run_number }}
+          files: |
+            release/TP-AI-HUB-debug.apk
+          make_latest: true
+
+      - name: Build Release AAB
         working-directory: android
-        run: ./gradlew bundleRelease --no-daemon
-
-      - name: Upload AAB
-        uses: actions/upload-artifact@v4
-        with:
-          name: TP-AI-HUB-release
-          path: android/app/build/outputs/bundle/release/*.aab
-          retention-days: 7
+        run: gradle bundleRelease --no-daemon
