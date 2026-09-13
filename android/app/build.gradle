@@ -40,8 +40,12 @@ android {
     }
 
     packagingOptions {
-        exclude 'META-INF/proguard/androidx-*.pro'
-        exclude 'META-INF/DEPENDENCIES'
+        resources {
+            excludes += [
+                'META-INF/proguard/androidx-*.pro',
+                'META-INF/DEPENDENCIES'
+            ]
+        }
     }
 }
 
